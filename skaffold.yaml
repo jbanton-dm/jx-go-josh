@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/jbanton-dm/jx-go-josh:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/jbanton-dm/jx-go-josh:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: jx-go-josh
+        chartPath: charts/jx-go-josh
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/jbanton-dm/jx-go-josh'
+          image.tag: '{{.DIGEST_HEX}}'
